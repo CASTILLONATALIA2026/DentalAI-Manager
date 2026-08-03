@@ -33,10 +33,40 @@ class DentalAIApp:
         file_menu.add_command(label='Salir', command=self.root.destroy)
 
     def _build_main_ui(self) -> None:
-        tk.Label(self.root, text='DentalAI Manager', font=('Segoe UI', 20, 'bold')).pack(pady=5)
-        tk.Label(self.root, text='Gestión clínica + IA dental', font=('Segoe UI', 11)).pack()
-        self.counter_label = tk.Label(self.root, text='Pacientes registrados: 0', font=('Segoe UI', 10, 'bold'))
-        self.counter_label.pack(pady=5)
+        # Cabecera profesional
+        header = tk.Frame(self.root, bg="#0F4C81", height=90)
+        header.pack(fill="x")
+
+        tk.Label(
+            header,
+            text="🦷 DentalAI Manager",
+            bg="#0F4C81",
+            fg="white",
+            font=("Segoe UI", 24, "bold"),
+        ).pack(anchor="w", padx=25, pady=(12, 0))
+
+        tk.Label(
+            header,
+            text="Gestión clínica inteligente • Python • SQLite • IA",
+            bg="#0F4C81",
+            fg="#D9ECFF",
+            font=("Segoe UI", 10),
+        ).pack(anchor="w", padx=27)
+
+        tk.Label(
+            header,
+            text="Desarrollado por Natalia Castillo",
+            bg="#0F4C81",
+            fg="white",
+            font=("Segoe UI", 9, "italic"),
+        ).pack(anchor="e", padx=20, pady=(0, 8))
+
+        self.counter_label = tk.Label(
+            self.root,
+            text="Pacientes registrados: 0",
+            font=("Segoe UI", 11, "bold"),
+        )
+        self.counter_label.pack(pady=10)
 
         tk.Label(self.root, text='Buscar paciente').pack()
         self.search_entry = tk.Entry(self.root, width=40)
@@ -332,6 +362,7 @@ class DentalAIApp:
 
         def reload_history(*_args) -> None:
             history.delete(*history.get_children())
+            print(database.list_analyses())
             for row in database.list_analyses(state_var.get(), patient_search.get().strip()):
                 history.insert('', 'end', values=tuple(row), tags=(row['estado'],))
             counts = database.analysis_counts()
