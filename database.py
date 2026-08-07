@@ -25,6 +25,27 @@ def init_db() -> None:
             )
             '''
         )
+
+        existing_columns = {
+            row["name"]
+            for row in connection.execute("PRAGMA table_info(pacientes)").fetchall()
+        }
+
+        if "telefono" not in existing_columns:
+            connection.execute(
+                "ALTER TABLE pacientes ADD COLUMN telefono TEXT DEFAULT ''"
+            )
+
+        if "email" not in existing_columns:
+            connection.execute(
+                "ALTER TABLE pacientes ADD COLUMN email TEXT DEFAULT ''"
+            )
+
+        if "observaciones" not in existing_columns:
+            connection.execute(
+                "ALTER TABLE pacientes ADD COLUMN observaciones TEXT DEFAULT ''"
+            )
+
         connection.execute(
             '''
             CREATE TABLE IF NOT EXISTS analisis_ia (
@@ -52,46 +73,107 @@ def list_patients(search: str = '') -> list[sqlite3.Row]:
         if search:
             return connection.execute(
                 '''
-                SELECT id, nombre, edad, tratamiento, proxima_cita
+                SELECT
+                    id,
+                    nombre,
+                    edad,
+                    telefono,
+                    email,
+                    tratamiento,
+                    proxima_cita,
+                    observaciones
                 FROM pacientes
                 WHERE LOWER(nombre) LIKE ?
                 ORDER BY nombre COLLATE NOCASE
                 ''',
                 (f'%{search.lower()}%',),
             ).fetchall()
+
         return connection.execute(
             '''
-            SELECT id, nombre, edad, tratamiento, proxima_cita
+            SELECT
+                id,
+                nombre,
+                edad,
+                telefono,
+                email,
+                tratamiento,
+                proxima_cita,
+                observaciones
             FROM pacientes
             ORDER BY id
             '''
         ).fetchall()
-
-
-def add_patient(nombre: str, edad: int, tratamiento: str, proxima_cita: str) -> int:
+def add_patient(
+    nombre: str,
+    edad: int,
+    tratamiento: str,
+    proxima_cita: str,
+    telefono: str = '',
+    email: str = '',
+    observaciones: str = '',
+) -> int:
     with closing(connect()) as connection, connection:
         cursor = connection.execute(
             '''
-            INSERT INTO pacientes (nombre, edad, tratamiento, proxima_cita)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO pacientes (
+                nombre,
+                edad,
+                tratamiento,
+                proxima_cita,
+                telefono,
+                email,
+                observaciones
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             ''',
-            (nombre, edad, tratamiento, proxima_cita),
+            (
+                nombre,
+                edad,
+                tratamiento,
+                proxima_cita,
+                telefono,
+                email,
+                observaciones,
+            ),
         )
         return int(cursor.lastrowid)
 
 
-def update_patient(patient_id: int, nombre: str, edad: int, tratamiento: str, proxima_cita: str) -> None:
+def update_patient(
+    patient_id: int,
+    nombre: str,
+    edad: int,
+    tratamiento: str,
+    proxima_cita: str,
+    telefono: str = "",
+    email: str = "",
+    observaciones: str = "",
+) -> None:
     with closing(connect()) as connection, connection:
         connection.execute(
             '''
             UPDATE pacientes
-            SET nombre=?, edad=?, tratamiento=?, proxima_cita=?
+            SET nombre=?,
+                edad=?,
+                tratamiento=?,
+                proxima_cita=?,
+                telefono=?,
+                email=?,
+                observaciones=?
             WHERE id=?
             ''',
-            (nombre, edad, tratamiento, proxima_cita, patient_id),
+            (
+                nombre,
+                edad,
+                tratamiento,
+                proxima_cita,
+                telefono,
+                email,
+                observaciones,
+                patient_id,
+            ),
         )
-
-
 def delete_patient(patient_id: int) -> None:
     with closing(connect()) as connection, connection:
         connection.execute('DELETE FROM pacientes WHERE id=?', (patient_id,))

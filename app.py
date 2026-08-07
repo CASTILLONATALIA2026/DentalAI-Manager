@@ -24,10 +24,7 @@ class DentalAIApp(ctk.CTk):
         self.title("DentalAI Manager")
         self.geometry("1280x820")
         self.minsize(1050, 700)
-        try:
-            self.state("zoomed")
-        except tk.TclError:
-            pass
+        self.after(100, lambda: self.state("zoomed"))
 
         database.init_db()
         self.current_patient_id: int | None = None
@@ -245,9 +242,28 @@ class DentalAIApp(ctk.CTk):
         table_frame.grid_columnconfigure(0, weight=1)
         table_frame.grid_rowconfigure(0, weight=1)
 
-        columns = ("ID", "Nombre", "Edad", "Tratamiento", "Próxima cita")
+        columns = (
+            "ID",
+            "Nombre",
+            "Edad",
+            "Teléfono",
+            "Email",
+            "Tratamiento",
+            "Próxima cita",
+            "Observaciones",
+        )
+
         tree = ttk.Treeview(table_frame, columns=columns, show="headings", style="Dental.Treeview")
-        widths = {"ID": 60, "Nombre": 250, "Edad": 75, "Tratamiento": 300, "Próxima cita": 150}
+        widths = {
+        "ID": 60,
+        "Nombre": 200,
+        "Edad": 70,
+        "Teléfono": 130,
+        "Email": 220,
+        "Tratamiento": 220,
+        "Próxima cita": 140,
+        "Observaciones": 280,
+    }
         for col in columns:
             tree.heading(col, text=col)
             tree.column(col, width=widths[col], anchor="center")
@@ -273,18 +289,24 @@ class DentalAIApp(ctk.CTk):
 
     def _selected_patient_from_tree(self, tree: ttk.Treeview) -> dict[str, object] | None:
         selection = tree.selection()
+
         if not selection:
             messagebox.showwarning("Aviso", "Selecciona un paciente.")
             return None
+
         values = tree.item(selection[0], "values")
+
         return {
             "id": int(values[0]),
             "nombre": values[1],
             "edad": int(values[2]),
-            "tratamiento": values[3],
-            "proxima_cita": values[4],
+            "telefono": values[3],
+            "email": values[4],
+            "tratamiento": values[5],
+            "proxima_cita": values[6],
+            "observaciones": values[7],
         }
-
+    
     def open_patient_form(self, patient: dict[str, object] | None = None) -> None:
         window = ctk.CTkToplevel(self)
         window.title("Modificar paciente" if patient else "Nuevo paciente")
@@ -295,46 +317,129 @@ class DentalAIApp(ctk.CTk):
         ctk.CTkLabel(window, text="Modificar paciente" if patient else "Nuevo paciente", font=("Segoe UI", 22, "bold")).pack(pady=(24, 18))
         fields: dict[str, ctk.CTkEntry] = {}
         labels = [
-            ("nombre", "Nombre"),
-            ("edad", "Edad"),
-            ("tratamiento", "Tratamiento"),
-            ("proxima_cita", "Próxima cita"),
-        ]
-        form = ctk.CTkFrame(window, fg_color="transparent")
-        form.pack(fill="both", expand=True, padx=34)
+    ("nombre", "Nombre"),
+    ("edad", "Edad"),
+    ("telefono", "Teléfono"),
+    ("email", "Email"),
+    ("tratamiento", "Tratamiento"),
+    ("proxima_cita", "Próxima cita"),
+]
+        form = ctk.CTkScrollableFrame(
+            window,
+            fg_color="transparent",
+        )
+        form.pack(
+            fill="both",
+            expand=True,
+            padx=34,
+            pady=(0, 20),
+        )
+
         for key, label in labels:
-            ctk.CTkLabel(form, text=label, anchor="w").pack(fill="x", pady=(7, 3))
-            entry = ctk.CTkEntry(form, height=38)
+            ctk.CTkLabel(
+                form,
+                text=label,
+                anchor="w"
+            ).pack(fill="x", pady=(7, 3))
+
+            entry = ctk.CTkEntry(
+                form,
+                height=38
+            )
             entry.pack(fill="x")
+
             if patient:
                 entry.insert(0, str(patient.get(key, "")))
+
             fields[key] = entry
+
+        ctk.CTkLabel(
+            form,
+            text="Observaciones",
+            anchor="w"
+        ).pack(fill="x", pady=(7, 3))
+
+        observaciones = ctk.CTkTextbox(
+            form,
+            height=90
+        )
+        observaciones.pack(fill="x")
+
+        if patient:
+            observaciones.insert(
+                "1.0",
+                str(patient.get("observaciones", ""))
+            )
+
+        if patient:
+            observaciones.insert(
+                "1.0",
+                str(patient.get("observaciones", ""))
+            )
 
         def save() -> None:
             nombre = fields["nombre"].get().strip()
             tratamiento = fields["tratamiento"].get().strip()
             cita = fields["proxima_cita"].get().strip()
+            telefono = fields["telefono"].get().strip()
+            email = fields["email"].get().strip()
+            observaciones_text = observaciones.get("1.0", "end").strip()
+
             try:
                 edad = int(fields["edad"].get().strip())
                 if edad < 0:
                     raise ValueError
             except ValueError:
-                messagebox.showwarning("Aviso", "La edad debe ser un número válido.", parent=window)
+                messagebox.showwarning(
+                    "Aviso",
+                    "La edad debe ser un número válido.",
+                    parent=window
+                )
                 return
+
             if not nombre or not tratamiento:
-                messagebox.showwarning("Aviso", "Nombre y tratamiento son obligatorios.", parent=window)
+                messagebox.showwarning(
+                    "Aviso",
+                    "Nombre y tratamiento son obligatorios.",
+                    parent=window
+                )
                 return
+
             if patient:
-                database.update_patient(int(patient["id"]), nombre, edad, tratamiento, cita)
+                database.update_patient(
+                    int(patient["id"]),
+                    nombre,
+                    edad,
+                    tratamiento,
+                    cita,
+                    telefono,
+                    email,
+                    observaciones_text,
+                )
             else:
-                database.add_patient(nombre, edad, tratamiento, cita)
+                database.add_patient(
+                    nombre,
+                    edad,
+                    tratamiento,
+                    cita,
+                    telefono,
+                    email,
+                    observaciones_text,
+                )
+
             window.destroy()
+
             if self.current_screen == "patients":
                 self.show_patients()
             else:
                 self.show_dashboard()
 
-        ctk.CTkButton(window, text="Guardar", command=save, height=42).pack(pady=22)
+        ctk.CTkButton(
+            window,
+            text="Guardar",
+            command=save,
+            height=42
+        ).pack(pady=22)
 
     def _edit_selected_patient(self, tree: ttk.Treeview) -> None:
         patient = self._selected_patient_from_tree(tree)
