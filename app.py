@@ -306,28 +306,59 @@ class DentalAIApp(ctk.CTk):
     )
         detail_label.pack(fill="x", padx=18, pady=16)
 
+        quick_actions = ctk.CTkFrame(
+            detail_frame,
+            fg_color="transparent"
+        )
+        quick_actions.pack(
+            fill="x",
+            padx=18,
+            pady=(0, 16)
+        )
+
+        ctk.CTkButton(
+            quick_actions,
+            text="IA Clínica",
+            width=130,
+            command=lambda: self._open_selected_patient_copilot(tree),
+        ).pack(side="left", padx=(0, 8))
+
+        ctk.CTkButton(
+            quick_actions,
+            text="Historial IA",
+            width=130,
+            command=lambda: self._open_selected_patient_history(tree),
+        ).pack(side="left", padx=8)
+
+        ctk.CTkButton(
+            quick_actions,
+            text="Informe PDF",
+            width=130,
+            command=lambda: self.generate_patient_report(tree),
+        ).pack(side="left", padx=8)
+
         def update_detail(_event=None) -> None:
             selection = tree.selection()
 
-        if not selection:
+            if not selection:
+                detail_label.configure(
+                    text="Selecciona un paciente para ver sus datos"
+                )
+                return
+
+            values = tree.item(selection[0], "values")
+
             detail_label.configure(
-                text="Selecciona un paciente para ver sus datos"
+                text=(
+                    f"Paciente: {values[1]}\n"
+                    f"Edad: {values[2]} años\n"
+                    f"Teléfono: {values[3] or 'No indicado'}\n"
+                    f"Email: {values[4] or 'No indicado'}\n"
+                    f"Tratamiento: {values[5]}\n"
+                    f"Próxima cita: {values[6] or 'No indicada'}\n"
+                    f"Observaciones: {values[7] or 'Sin observaciones'}"
+                )
             )
-            return
-
-        values = tree.item(selection[0], "values")
-
-        detail_label.configure(
-            text=(
-                f"Paciente: {values[1]}\n"
-                f"Edad: {values[2]} años\n"
-                f"Teléfono: {values[3] or 'No indicado'}\n"
-                f"Email: {values[4] or 'No indicado'}\n"
-                f"Tratamiento: {values[5]}\n"
-                f"Próxima cita: {values[6] or 'No indicada'}\n"
-                f"Observaciones: {values[7] or 'Sin observaciones'}"
-            )
-        )
 
         tree.bind("<<TreeviewSelect>>", update_detail)
 
@@ -336,9 +367,25 @@ class DentalAIApp(ctk.CTk):
         ctk.CTkButton(footer, text="Exportar Excel", command=self.export_excel, width=145).pack(side="left", padx=(0, 8))
         ctk.CTkButton(footer, text="Importar JSON", command=lambda: self.import_json(reload), width=145).pack(side="left", padx=8)
         ctk.CTkButton(footer, text="Informe PDF", command=lambda: self.generate_patient_report(tree), width=145).pack(side="left", padx=8)
+        def _open_selected_patient_copilot(self, tree: ttk.Treeview) -> None:
+            patient = self._selected_patient_from_tree(tree)
 
+            if not patient:
+                return
+
+            self.show_copilot(str(patient["nombre"]))
+
+    def _open_selected_patient_history(self, tree: ttk.Treeview) -> None:
+        patient = self._selected_patient_from_tree(tree)
+
+        if not patient:
+            return
+
+        self.show_history(str(patient["nombre"]))
     def _selected_patient_from_tree(self, tree: ttk.Treeview) -> dict[str, object] | None:
         selection = tree.selection()
+
+
 
         if not selection:
             messagebox.showwarning("Aviso", "Selecciona un paciente.")
@@ -565,7 +612,7 @@ class DentalAIApp(ctk.CTk):
         ).pack(padx=28, pady=(0, 28))
 
     # ---------------- Copilot ----------------
-    def show_copilot(self) -> None:
+    def show_copilot(self, selected_patient: str | None = None) -> None:
         page = self._page("IA Clínica", "Análisis orientativo sujeto a validación profesional")
         wrapper = ctk.CTkFrame(page, fg_color="transparent")
         wrapper.grid(row=2, column=0, sticky="nsew", padx=34, pady=(0, 24))
@@ -578,7 +625,13 @@ class DentalAIApp(ctk.CTk):
         result_frame.grid(row=0, column=1, sticky="nsew", padx=(10, 0))
 
         patient_names = [row["nombre"] for row in database.list_patients()]
-        patient_var = tk.StringVar(value=patient_names[0] if patient_names else "Paciente no seleccionado")
+        default_patient = (
+    selected_patient
+    if selected_patient in patient_names
+    else (patient_names[0] if patient_names else "Paciente no seleccionado")
+)
+
+        patient_var = tk.StringVar(value=default_patient)
         ctk.CTkLabel(form, text="Paciente", anchor="w").pack(fill="x", padx=22, pady=(22, 4))
         patient_combo = ctk.CTkComboBox(form, values=patient_names or ["Paciente no seleccionado"], variable=patient_var)
         patient_combo.pack(fill="x", padx=22)
@@ -675,13 +728,13 @@ class DentalAIApp(ctk.CTk):
         ctk.CTkButton(buttons, text="Guardar análisis", command=save_analysis).pack(side="left", expand=True, fill="x", padx=(6, 0))
 
     # ---------------- Historial ----------------
-    def show_history(self) -> None:
+    def show_history(self, selected_patient: str | None = None) -> None:
         page = self._page("Historial IA", "Revisión, validación y exportación de análisis")
         controls = ctk.CTkFrame(page, fg_color="transparent")
         controls.grid(row=2, column=0, sticky="ew", padx=34, pady=(0, 12))
         controls.grid_columnconfigure(2, weight=1)
         state_var = tk.StringVar(value="Todos")
-        patient_var = tk.StringVar()
+        patient_var = tk.StringVar(value=selected_patient or "")
         ctk.CTkLabel(controls, text="Estado:").grid(row=0, column=0, padx=(0, 6))
         state_combo = ctk.CTkComboBox(controls, values=["Todos", "Pendiente", "Validado", "Rechazado"], variable=state_var, width=160)
         state_combo.grid(row=0, column=1, padx=(0, 12))
