@@ -281,8 +281,58 @@ class DentalAIApp(ctk.CTk):
         tree.bind("<Double-1>", lambda _event: self._edit_selected_patient(tree))
         reload()
 
+        detail_frame = ctk.CTkFrame(
+        page,
+        fg_color="white",
+        corner_radius=12,
+        border_width=1,
+        border_color="#DDE5EE",
+    )
+        detail_frame.grid(
+        row=4,
+        column=0,
+        sticky="ew",
+        padx=34,
+        pady=(0, 12),
+    )
+
+        detail_label = ctk.CTkLabel(
+        detail_frame,
+        text="Selecciona un paciente para ver sus datos",
+        anchor="w",
+        justify="left",
+        font=("Segoe UI", 13),
+        text_color="#374151",
+    )
+        detail_label.pack(fill="x", padx=18, pady=16)
+
+        def update_detail(_event=None) -> None:
+            selection = tree.selection()
+
+        if not selection:
+            detail_label.configure(
+                text="Selecciona un paciente para ver sus datos"
+            )
+            return
+
+        values = tree.item(selection[0], "values")
+
+        detail_label.configure(
+            text=(
+                f"Paciente: {values[1]}\n"
+                f"Edad: {values[2]} años\n"
+                f"Teléfono: {values[3] or 'No indicado'}\n"
+                f"Email: {values[4] or 'No indicado'}\n"
+                f"Tratamiento: {values[5]}\n"
+                f"Próxima cita: {values[6] or 'No indicada'}\n"
+                f"Observaciones: {values[7] or 'Sin observaciones'}"
+            )
+        )
+
+        tree.bind("<<TreeviewSelect>>", update_detail)
+
         footer = ctk.CTkFrame(page, fg_color="transparent")
-        footer.grid(row=4, column=0, sticky="ew", padx=34, pady=(0, 24))
+        footer.grid(row=5, column=0, sticky="ew", padx=34, pady=(0, 24))
         ctk.CTkButton(footer, text="Exportar Excel", command=self.export_excel, width=145).pack(side="left", padx=(0, 8))
         ctk.CTkButton(footer, text="Importar JSON", command=lambda: self.import_json(reload), width=145).pack(side="left", padx=8)
         ctk.CTkButton(footer, text="Informe PDF", command=lambda: self.generate_patient_report(tree), width=145).pack(side="left", padx=8)
