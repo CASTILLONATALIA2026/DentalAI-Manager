@@ -230,14 +230,49 @@ class DentalAIApp(ctk.CTk):
         toolbar = ctk.CTkFrame(page, fg_color="transparent")
         toolbar.grid(row=2, column=0, sticky="ew", padx=34, pady=(0, 12))
         toolbar.grid_columnconfigure(0, weight=1)
-        search_var = tk.StringVar()
-        search_entry = ctk.CTkEntry(toolbar, textvariable=search_var, placeholder_text="Buscar paciente...", height=40)
-        search_entry.grid(row=0, column=0, sticky="ew", padx=(0, 12))
-        ctk.CTkButton(toolbar, text="Nuevo", command=self.open_patient_form, width=110, height=40).grid(row=0, column=1, padx=4)
-        ctk.CTkButton(toolbar, text="Editar", command=lambda: self._edit_selected_patient(tree), width=110, height=40).grid(row=0, column=2, padx=4)
-        ctk.CTkButton(toolbar, text="Eliminar", command=lambda: self._delete_selected_patient(tree), width=110, height=40, fg_color="#C0392B", hover_color="#A93226").grid(row=0, column=3, padx=4)
 
-        table_frame = ctk.CTkFrame(page, fg_color="white", corner_radius=12, border_width=1, border_color="#DDE5EE")
+        search_var = tk.StringVar()
+        search_entry = ctk.CTkEntry(
+            toolbar,
+            textvariable=search_var,
+            placeholder_text="Buscar paciente...",
+            height=40,
+        )
+        search_entry.grid(row=0, column=0, sticky="ew", padx=(0, 12))
+
+        ctk.CTkButton(
+            toolbar,
+            text="Nuevo",
+            command=self.open_patient_form,
+            width=110,
+            height=40,
+        ).grid(row=0, column=1, padx=4)
+
+        ctk.CTkButton(
+            toolbar,
+            text="Editar",
+            command=lambda: self._edit_selected_patient(tree),
+            width=110,
+            height=40,
+        ).grid(row=0, column=2, padx=4)
+
+        ctk.CTkButton(
+            toolbar,
+            text="Eliminar",
+            command=lambda: self._delete_selected_patient(tree),
+            width=110,
+            height=40,
+            fg_color="#C0392B",
+            hover_color="#A93226",
+        ).grid(row=0, column=3, padx=4)
+
+        table_frame = ctk.CTkFrame(
+            page,
+            fg_color="white",
+            corner_radius=12,
+            border_width=1,
+            border_color="#DDE5EE",
+        )
         table_frame.grid(row=3, column=0, sticky="nsew", padx=34, pady=(0, 12))
         table_frame.grid_columnconfigure(0, weight=1)
         table_frame.grid_rowconfigure(0, weight=1)
@@ -252,22 +287,29 @@ class DentalAIApp(ctk.CTk):
             "Próxima cita",
             "Observaciones",
         )
-
-        tree = ttk.Treeview(table_frame, columns=columns, show="headings", style="Dental.Treeview")
         widths = {
-        "ID": 60,
-        "Nombre": 200,
-        "Edad": 70,
-        "Teléfono": 130,
-        "Email": 220,
-        "Tratamiento": 220,
-        "Próxima cita": 140,
-        "Observaciones": 280,
-    }
+            "ID": 60,
+            "Nombre": 200,
+            "Edad": 70,
+            "Teléfono": 130,
+            "Email": 220,
+            "Tratamiento": 220,
+            "Próxima cita": 140,
+            "Observaciones": 280,
+        }
+
+        tree = ttk.Treeview(
+            table_frame,
+            columns=columns,
+            show="headings",
+            style="Dental.Treeview",
+        )
         for col in columns:
             tree.heading(col, text=col)
             tree.column(col, width=widths[col], anchor="center")
+
         tree.grid(row=0, column=0, sticky="nsew", padx=12, pady=12)
+
         scrollbar = ttk.Scrollbar(table_frame, orient="vertical", command=tree.yview)
         scrollbar.grid(row=0, column=1, sticky="ns", pady=12, padx=(0, 10))
         tree.configure(yscrollcommand=scrollbar.set)
@@ -282,39 +324,32 @@ class DentalAIApp(ctk.CTk):
         reload()
 
         detail_frame = ctk.CTkFrame(
-        page,
-        fg_color="white",
-        corner_radius=12,
-        border_width=1,
-        border_color="#DDE5EE",
-    )
+            page,
+            fg_color="white",
+            corner_radius=12,
+            border_width=1,
+            border_color="#DDE5EE",
+        )
         detail_frame.grid(
-        row=4,
-        column=0,
-        sticky="ew",
-        padx=34,
-        pady=(0, 12),
-    )
+            row=4,
+            column=0,
+            sticky="ew",
+            padx=34,
+            pady=(0, 12),
+        )
 
         detail_label = ctk.CTkLabel(
-        detail_frame,
-        text="Selecciona un paciente para ver sus datos",
-        anchor="w",
-        justify="left",
-        font=("Segoe UI", 13),
-        text_color="#374151",
-    )
+            detail_frame,
+            text="Selecciona un paciente para ver sus datos",
+            anchor="w",
+            justify="left",
+            font=("Segoe UI", 13),
+            text_color="#374151",
+        )
         detail_label.pack(fill="x", padx=18, pady=16)
 
-        quick_actions = ctk.CTkFrame(
-            detail_frame,
-            fg_color="transparent"
-        )
-        quick_actions.pack(
-            fill="x",
-            padx=18,
-            pady=(0, 16)
-        )
+        quick_actions = ctk.CTkFrame(detail_frame, fg_color="transparent")
+        quick_actions.pack(fill="x", padx=18, pady=(0, 16))
 
         ctk.CTkButton(
             quick_actions,
@@ -339,7 +374,6 @@ class DentalAIApp(ctk.CTk):
 
         def update_detail(_event=None) -> None:
             selection = tree.selection()
-
             if not selection:
                 detail_label.configure(
                     text="Selecciona un paciente para ver sus datos"
@@ -347,7 +381,6 @@ class DentalAIApp(ctk.CTk):
                 return
 
             values = tree.item(selection[0], "values")
-
             detail_label.configure(
                 text=(
                     f"Paciente: {values[1]}\n"
@@ -364,35 +397,47 @@ class DentalAIApp(ctk.CTk):
 
         footer = ctk.CTkFrame(page, fg_color="transparent")
         footer.grid(row=5, column=0, sticky="ew", padx=34, pady=(0, 24))
-        ctk.CTkButton(footer, text="Exportar Excel", command=self.export_excel, width=145).pack(side="left", padx=(0, 8))
-        ctk.CTkButton(footer, text="Importar JSON", command=lambda: self.import_json(reload), width=145).pack(side="left", padx=8)
-        ctk.CTkButton(footer, text="Informe PDF", command=lambda: self.generate_patient_report(tree), width=145).pack(side="left", padx=8)
-        def _open_selected_patient_copilot(self, tree: ttk.Treeview) -> None:
-            patient = self._selected_patient_from_tree(tree)
 
-            if not patient:
-                return
+        ctk.CTkButton(
+            footer,
+            text="Exportar Excel",
+            command=self.export_excel,
+            width=145,
+        ).pack(side="left", padx=(0, 8))
 
-            self.show_copilot(str(patient["nombre"]))
+        ctk.CTkButton(
+            footer,
+            text="Importar JSON",
+            command=lambda: self.import_json(reload),
+            width=145,
+        ).pack(side="left", padx=8)
+
+        ctk.CTkButton(
+            footer,
+            text="Informe PDF",
+            command=lambda: self.generate_patient_report(tree),
+            width=145,
+        ).pack(side="left", padx=8)
+
+    def _open_selected_patient_copilot(self, tree: ttk.Treeview) -> None:
+        patient = self._selected_patient_from_tree(tree)
+        if not patient:
+            return
+        self.show_copilot(str(patient["nombre"]))
 
     def _open_selected_patient_history(self, tree: ttk.Treeview) -> None:
         patient = self._selected_patient_from_tree(tree)
-
         if not patient:
             return
-
         self.show_history(str(patient["nombre"]))
+
     def _selected_patient_from_tree(self, tree: ttk.Treeview) -> dict[str, object] | None:
         selection = tree.selection()
-
-
-
         if not selection:
             messagebox.showwarning("Aviso", "Selecciona un paciente.")
             return None
 
         values = tree.item(selection[0], "values")
-
         return {
             "id": int(values[0]),
             "nombre": values[1],
@@ -403,46 +448,40 @@ class DentalAIApp(ctk.CTk):
             "proxima_cita": values[6],
             "observaciones": values[7],
         }
-    
+
     def open_patient_form(self, patient: dict[str, object] | None = None) -> None:
         window = ctk.CTkToplevel(self)
         window.title("Modificar paciente" if patient else "Nuevo paciente")
-        window.geometry("470x480")
+        window.geometry("470x520")
+        window.minsize(430, 460)
         window.transient(self)
         window.grab_set()
 
-        ctk.CTkLabel(window, text="Modificar paciente" if patient else "Nuevo paciente", font=("Segoe UI", 22, "bold")).pack(pady=(24, 18))
+        ctk.CTkLabel(
+            window,
+            text="Modificar paciente" if patient else "Nuevo paciente",
+            font=("Segoe UI", 22, "bold"),
+        ).pack(pady=(24, 18))
+
         fields: dict[str, ctk.CTkEntry] = {}
         labels = [
-    ("nombre", "Nombre"),
-    ("edad", "Edad"),
-    ("telefono", "Teléfono"),
-    ("email", "Email"),
-    ("tratamiento", "Tratamiento"),
-    ("proxima_cita", "Próxima cita"),
-]
-        form = ctk.CTkScrollableFrame(
-            window,
-            fg_color="transparent",
-        )
-        form.pack(
-            fill="both",
-            expand=True,
-            padx=34,
-            pady=(0, 20),
-        )
+            ("nombre", "Nombre"),
+            ("edad", "Edad"),
+            ("telefono", "Teléfono"),
+            ("email", "Email"),
+            ("tratamiento", "Tratamiento"),
+            ("proxima_cita", "Próxima cita"),
+        ]
+
+        form = ctk.CTkScrollableFrame(window, fg_color="transparent")
+        form.pack(fill="both", expand=True, padx=34, pady=(0, 20))
 
         for key, label in labels:
-            ctk.CTkLabel(
-                form,
-                text=label,
-                anchor="w"
-            ).pack(fill="x", pady=(7, 3))
-
-            entry = ctk.CTkEntry(
-                form,
-                height=38
+            ctk.CTkLabel(form, text=label, anchor="w").pack(
+                fill="x",
+                pady=(7, 3),
             )
+            entry = ctk.CTkEntry(form, height=38)
             entry.pack(fill="x")
 
             if patient:
@@ -450,28 +489,17 @@ class DentalAIApp(ctk.CTk):
 
             fields[key] = entry
 
-        ctk.CTkLabel(
-            form,
-            text="Observaciones",
-            anchor="w"
-        ).pack(fill="x", pady=(7, 3))
-
-        observaciones = ctk.CTkTextbox(
-            form,
-            height=90
+        ctk.CTkLabel(form, text="Observaciones", anchor="w").pack(
+            fill="x",
+            pady=(7, 3),
         )
+        observaciones = ctk.CTkTextbox(form, height=90)
         observaciones.pack(fill="x")
 
         if patient:
             observaciones.insert(
                 "1.0",
-                str(patient.get("observaciones", ""))
-            )
-
-        if patient:
-            observaciones.insert(
-                "1.0",
-                str(patient.get("observaciones", ""))
+                str(patient.get("observaciones", "")),
             )
 
         def save() -> None:
@@ -490,7 +518,7 @@ class DentalAIApp(ctk.CTk):
                 messagebox.showwarning(
                     "Aviso",
                     "La edad debe ser un número válido.",
-                    parent=window
+                    parent=window,
                 )
                 return
 
@@ -498,7 +526,7 @@ class DentalAIApp(ctk.CTk):
                 messagebox.showwarning(
                     "Aviso",
                     "Nombre y tratamiento son obligatorios.",
-                    parent=window
+                    parent=window,
                 )
                 return
 
@@ -532,11 +560,11 @@ class DentalAIApp(ctk.CTk):
                 self.show_dashboard()
 
         ctk.CTkButton(
-            window,
+            form,
             text="Guardar",
             command=save,
-            height=42
-        ).pack(pady=22)
+            height=42,
+        ).pack(fill="x", pady=(18, 12))
 
     def _edit_selected_patient(self, tree: ttk.Treeview) -> None:
         patient = self._selected_patient_from_tree(tree)
@@ -569,15 +597,33 @@ class DentalAIApp(ctk.CTk):
         messagebox.showinfo("JSON", f"Se han importado {imported} pacientes.")
 
     def export_excel(self) -> None:
-        path = filedialog.asksaveasfilename(defaultextension=".xlsx", filetypes=[("Excel", "*.xlsx")], initialfile="pacientes.xlsx")
+        path = filedialog.asksaveasfilename(
+            defaultextension=".xlsx",
+            filetypes=[("Excel", "*.xlsx")],
+            initialfile="pacientes.xlsx",
+        )
         if not path:
             return
+
         workbook = Workbook()
         sheet = workbook.active
         sheet.title = "Pacientes"
-        sheet.append(["ID", "Nombre", "Edad", "Tratamiento", "Próxima cita"])
+        sheet.append(
+            [
+                "ID",
+                "Nombre",
+                "Edad",
+                "Teléfono",
+                "Email",
+                "Tratamiento",
+                "Próxima cita",
+                "Observaciones",
+            ]
+        )
+
         for row in database.list_patients():
             sheet.append(tuple(row))
+
         workbook.save(path)
         messagebox.showinfo("Excel", "Archivo creado correctamente.")
 
@@ -626,10 +672,14 @@ class DentalAIApp(ctk.CTk):
 
         patient_names = [row["nombre"] for row in database.list_patients()]
         default_patient = (
-    selected_patient
-    if selected_patient in patient_names
-    else (patient_names[0] if patient_names else "Paciente no seleccionado")
-)
+            selected_patient
+            if selected_patient in patient_names
+            else (
+                patient_names[0]
+                if patient_names
+                else "Paciente no seleccionado"
+            )
+        )
 
         patient_var = tk.StringVar(value=default_patient)
         ctk.CTkLabel(form, text="Paciente", anchor="w").pack(fill="x", padx=22, pady=(22, 4))
@@ -729,37 +779,93 @@ class DentalAIApp(ctk.CTk):
 
     # ---------------- Historial ----------------
     def show_history(self, selected_patient: str | None = None) -> None:
-        page = self._page("Historial IA", "Revisión, validación y exportación de análisis")
+        page = self._page(
+            "Historial IA",
+            "Revisión, validación y exportación de análisis",
+        )
+
         controls = ctk.CTkFrame(page, fg_color="transparent")
         controls.grid(row=2, column=0, sticky="ew", padx=34, pady=(0, 12))
         controls.grid_columnconfigure(2, weight=1)
+
         state_var = tk.StringVar(value="Todos")
         patient_var = tk.StringVar(value=selected_patient or "")
-        ctk.CTkLabel(controls, text="Estado:").grid(row=0, column=0, padx=(0, 6))
-        state_combo = ctk.CTkComboBox(controls, values=["Todos", "Pendiente", "Validado", "Rechazado"], variable=state_var, width=160)
+
+        ctk.CTkLabel(controls, text="Estado:").grid(
+            row=0,
+            column=0,
+            padx=(0, 6),
+        )
+        state_combo = ctk.CTkComboBox(
+            controls,
+            values=["Todos", "Pendiente", "Validado", "Rechazado"],
+            variable=state_var,
+            width=160,
+        )
         state_combo.grid(row=0, column=1, padx=(0, 12))
-        search = ctk.CTkEntry(controls, textvariable=patient_var, placeholder_text="Buscar paciente...")
+
+        search = ctk.CTkEntry(
+            controls,
+            textvariable=patient_var,
+            placeholder_text="Buscar paciente...",
+        )
         search.grid(row=0, column=2, sticky="ew")
 
-        table_frame = ctk.CTkFrame(page, fg_color="white", corner_radius=12, border_width=1, border_color="#DDE5EE")
+        table_frame = ctk.CTkFrame(
+            page,
+            fg_color="white",
+            corner_radius=12,
+            border_width=1,
+            border_color="#DDE5EE",
+        )
         table_frame.grid(row=3, column=0, sticky="nsew", padx=34, pady=(0, 12))
         table_frame.grid_columnconfigure(0, weight=1)
         table_frame.grid_rowconfigure(0, weight=1)
+
         columns = ("ID", "Paciente", "Fecha", "Prioridad", "Estado")
-        tree = ttk.Treeview(table_frame, columns=columns, show="headings", style="Dental.Treeview")
-        widths = {"ID": 60, "Paciente": 260, "Fecha": 180, "Prioridad": 120, "Estado": 130}
+        widths = {
+            "ID": 60,
+            "Paciente": 260,
+            "Fecha": 180,
+            "Prioridad": 120,
+            "Estado": 130,
+        }
+
+        tree = ttk.Treeview(
+            table_frame,
+            columns=columns,
+            show="headings",
+            style="Dental.Treeview",
+        )
         for col in columns:
             tree.heading(col, text=col)
             tree.column(col, width=widths[col], anchor="center")
+
         tree.tag_configure("Pendiente", background="#FFF4CC")
         tree.tag_configure("Validado", background="#DCFCE7")
         tree.tag_configure("Rechazado", background="#FEE2E2")
         tree.grid(row=0, column=0, sticky="nsew", padx=12, pady=12)
 
+        scrollbar = ttk.Scrollbar(
+            table_frame,
+            orient="vertical",
+            command=tree.yview,
+        )
+        scrollbar.grid(row=0, column=1, sticky="ns", pady=12, padx=(0, 10))
+        tree.configure(yscrollcommand=scrollbar.set)
+
         def reload(*_args: object) -> None:
             tree.delete(*tree.get_children())
-            for row in database.list_analyses(state_var.get(), patient_var.get().strip()):
-                tree.insert("", "end", values=tuple(row), tags=(row["estado"],))
+            for row in database.list_analyses(
+                state_var.get(),
+                patient_var.get().strip(),
+            ):
+                tree.insert(
+                    "",
+                    "end",
+                    values=tuple(row),
+                    tags=(row["estado"],),
+                )
 
         def selected_id() -> int | None:
             selection = tree.selection()
@@ -779,40 +885,215 @@ class DentalAIApp(ctk.CTk):
             analysis_id = selected_id()
             if analysis_id is None:
                 return
+
             row = database.get_analysis(analysis_id)
             if row is None:
-                messagebox.showerror("Error", "No se ha encontrado el análisis.")
+                messagebox.showerror(
+                    "Error",
+                    "No se ha encontrado el análisis.",
+                )
                 return
+
             window = ctk.CTkToplevel(self)
             window.title(f"Detalle análisis #{analysis_id}")
-            window.geometry("780x700")
+            window.geometry("860x760")
+            window.minsize(760, 620)
+            window.transient(self)
+
+            container = ctk.CTkScrollableFrame(
+                window,
+                fg_color="#F4F7FB",
+            )
+            container.pack(
+                fill="both",
+                expand=True,
+                padx=18,
+                pady=18,
+            )
+
+            header = ctk.CTkFrame(
+                container,
+                fg_color="white",
+                corner_radius=14,
+                border_width=1,
+                border_color="#DDE5EE",
+            )
+            header.pack(fill="x", pady=(0, 14))
+
+            ctk.CTkLabel(
+                header,
+                text=f"Análisis IA #{analysis_id}",
+                font=("Segoe UI", 24, "bold"),
+                text_color="#1F2937",
+            ).pack(anchor="w", padx=20, pady=(18, 4))
+
+            ctk.CTkLabel(
+                header,
+                text=f"Paciente: {row['paciente']}",
+                font=("Segoe UI", 15, "bold"),
+                text_color="#0F4C81",
+            ).pack(anchor="w", padx=20)
+
+            ctk.CTkLabel(
+                header,
+                text=f"Fecha: {row['fecha']}",
+                font=("Segoe UI", 12),
+                text_color="#6B7280",
+            ).pack(anchor="w", padx=20, pady=(4, 14))
+
+            badges = ctk.CTkFrame(header, fg_color="transparent")
+            badges.pack(fill="x", padx=20, pady=(0, 18))
+
+            priority_color = {
+                "Urgente": ("#FEE2E2", "#991B1B"),
+                "Alta": ("#FFEDD5", "#9A3412"),
+                "Media": ("#FEF3C7", "#92400E"),
+                "Baja": ("#DCFCE7", "#166534"),
+            }.get(row["prioridad"], ("#FFF4CC", "#7A5B00"))
+
+            state_color = {
+                "Pendiente": ("#FFF4CC", "#7A5B00"),
+                "Validado": ("#DCFCE7", "#166534"),
+                "Rechazado": ("#FEE2E2", "#991B1B"),
+            }.get(row["estado"], ("#E8F1FA", "#0F4C81"))
+
+            ctk.CTkLabel(
+                badges,
+                text=f"Prioridad: {row['prioridad']}",
+                fg_color=priority_color[0],
+                text_color=priority_color[1],
+                corner_radius=8,
+                padx=12,
+                pady=6,
+            ).pack(side="left", padx=(0, 8))
+
+            ctk.CTkLabel(
+                badges,
+                text=f"Estado: {row['estado']}",
+                fg_color=state_color[0],
+                text_color=state_color[1],
+                corner_radius=8,
+                padx=12,
+                pady=6,
+            ).pack(side="left")
+
+            def section(
+                title: str,
+                content: object,
+                alert: bool = False,
+            ) -> None:
+                frame = ctk.CTkFrame(
+                    container,
+                    fg_color="#FFF4F4" if alert else "white",
+                    corner_radius=12,
+                    border_width=1,
+                    border_color="#F0B8B8" if alert else "#DDE5EE",
+                )
+                frame.pack(fill="x", pady=(0, 12))
+
+                ctk.CTkLabel(
+                    frame,
+                    text=title,
+                    font=("Segoe UI", 14, "bold"),
+                    text_color="#A93226" if alert else "#1F2937",
+                ).pack(anchor="w", padx=18, pady=(14, 6))
+
+                ctk.CTkLabel(
+                    frame,
+                    text=str(content),
+                    justify="left",
+                    anchor="w",
+                    wraplength=760,
+                    text_color="#374151",
+                ).pack(fill="x", padx=18, pady=(0, 14))
+
+            section("Síntomas", row["sintomas"])
+            section("Duración", row["duracion"] or "No indicada")
+            section(
+                "Dolor",
+                row["dolor"] if row["dolor"] is not None else "No indicado",
+            )
+            section(
+                "Antecedentes",
+                row["antecedentes"] or "No indicados",
+            )
+            section(
+                "Signos asociados",
+                f"Fiebre: {'Sí' if row['fiebre'] else 'No'}\n"
+                f"Inflamación: {'Sí' if row['inflamacion'] else 'No'}",
+            )
+            section(
+                "Valoración clínica orientativa",
+                row["valoracion"] or "Sin valoración",
+            )
+            section(
+                "Pruebas sugeridas",
+                row["pruebas"] or "No indicadas",
+            )
+            section(
+                "Señales de alarma",
+                row["alarmas"] or "No indicadas",
+                alert=bool(row["alarmas"]),
+            )
+
             fields = [
-                ("Paciente", row["paciente"]), ("Fecha", row["fecha"]), ("Síntomas", row["sintomas"]),
+                ("Paciente", row["paciente"]),
+                ("Fecha", row["fecha"]),
+                ("Síntomas", row["sintomas"]),
                 ("Duración", row["duracion"] or "No indicada"),
-                ("Dolor", row["dolor"] if row["dolor"] is not None else "No indicado"),
+                (
+                    "Dolor",
+                    row["dolor"]
+                    if row["dolor"] is not None
+                    else "No indicado",
+                ),
                 ("Antecedentes", row["antecedentes"] or "No indicados"),
                 ("Fiebre", "Sí" if row["fiebre"] else "No"),
                 ("Inflamación", "Sí" if row["inflamacion"] else "No"),
-                ("Valoración", row["valoracion"]), ("Prioridad", row["prioridad"]),
+                ("Valoración", row["valoracion"] or "Sin valoración"),
+                ("Prioridad", row["prioridad"]),
                 ("Pruebas sugeridas", row["pruebas"] or "No indicadas"),
-                ("Señales de alarma", row["alarmas"] or "No indicadas"), ("Estado", row["estado"]),
+                ("Señales de alarma", row["alarmas"] or "No indicadas"),
+                ("Estado", row["estado"]),
             ]
-            text = ctk.CTkTextbox(window, wrap="word")
-            text.pack(fill="both", expand=True, padx=20, pady=20)
-            for label, value in fields:
-                text.insert("end", f"{label}:\n{value}\n\n")
-            text.configure(state="disabled")
 
             def export_pdf() -> None:
                 path = filedialog.asksaveasfilename(
-                    defaultextension=".pdf", filetypes=[("PDF", "*.pdf")],
-                    initialfile=f"analisis_IA_{row['paciente']}_{analysis_id}.pdf",
+                    defaultextension=".pdf",
+                    filetypes=[("PDF", "*.pdf")],
+                    initialfile=(
+                        f"analisis_IA_{row['paciente']}_{analysis_id}.pdf"
+                    ),
                 )
-                if path:
-                    create_analysis_report(path, analysis_id, fields)
-                    messagebox.showinfo("PDF", "Análisis exportado correctamente.")
+                if not path:
+                    return
 
-            ctk.CTkButton(window, text="Exportar PDF", command=export_pdf).pack(pady=(0, 18))
+                create_analysis_report(path, analysis_id, fields)
+                messagebox.showinfo(
+                    "PDF",
+                    "Análisis exportado correctamente.",
+                )
+
+            actions = ctk.CTkFrame(container, fg_color="transparent")
+            actions.pack(fill="x", pady=(4, 16))
+
+            ctk.CTkButton(
+                actions,
+                text="Exportar PDF",
+                command=export_pdf,
+                width=150,
+                height=40,
+            ).pack(side="left")
+
+            ctk.CTkButton(
+                actions,
+                text="Cerrar",
+                command=window.destroy,
+                width=120,
+                height=40,
+                fg_color="#6B7280",
+                hover_color="#4B5563",
+            ).pack(side="left", padx=10)
 
         state_combo.configure(command=lambda _value: reload())
         patient_var.trace_add("write", reload)
@@ -821,10 +1102,36 @@ class DentalAIApp(ctk.CTk):
 
         actions = ctk.CTkFrame(page, fg_color="transparent")
         actions.grid(row=4, column=0, sticky="w", padx=34, pady=(0, 24))
-        ctk.CTkButton(actions, text="Ver detalle", command=detail, width=130).pack(side="left", padx=(0, 6))
-        ctk.CTkButton(actions, text="Validar", command=lambda: change_state("Validado"), width=110).pack(side="left", padx=6)
-        ctk.CTkButton(actions, text="Rechazar", command=lambda: change_state("Rechazado"), width=110, fg_color="#C0392B", hover_color="#A93226").pack(side="left", padx=6)
-        ctk.CTkButton(actions, text="Pendiente", command=lambda: change_state("Pendiente"), width=110).pack(side="left", padx=6)
+
+        ctk.CTkButton(
+            actions,
+            text="Ver detalle",
+            command=detail,
+            width=130,
+        ).pack(side="left", padx=(0, 6))
+
+        ctk.CTkButton(
+            actions,
+            text="Validar",
+            command=lambda: change_state("Validado"),
+            width=110,
+        ).pack(side="left", padx=6)
+
+        ctk.CTkButton(
+            actions,
+            text="Rechazar",
+            command=lambda: change_state("Rechazado"),
+            width=110,
+            fg_color="#C0392B",
+            hover_color="#A93226",
+        ).pack(side="left", padx=6)
+
+        ctk.CTkButton(
+            actions,
+            text="Pendiente",
+            command=lambda: change_state("Pendiente"),
+            width=110,
+        ).pack(side="left", padx=6)
 
     # ---------------- Estadísticas ----------------
     def show_statistics(self) -> None:
