@@ -67,6 +67,21 @@ def init_db() -> None:
             '''
         )
 
+        connection.execute(
+            '''
+            CREATE TABLE IF NOT EXISTS prescripciones (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                paciente TEXT NOT NULL,
+                fecha TEXT NOT NULL,
+                medicamento TEXT NOT NULL,
+                dosis TEXT NOT NULL,
+                frecuencia TEXT NOT NULL,
+                duracion TEXT NOT NULL,
+                indicaciones TEXT,
+                estado TEXT NOT NULL DEFAULT 'Activa'
+            )
+            '''
+        )
 
 def list_patients(search: str = '') -> list[sqlite3.Row]:
     with closing(connect()) as connection:
@@ -295,3 +310,99 @@ def analysis_counts() -> dict[str, int]:
             counts[row['estado']] = row['cantidad']
         counts['Total'] = sum(counts.values())
         return counts
+
+def add_prescription(data: dict[str, Any]) -> int:
+    with closing(connect()) as connection, connection:
+        cursor = connection.execute(
+            '''
+            INSERT INTO prescripciones (
+                paciente,
+                fecha,
+                medicamento,
+                dosis,
+                frecuencia,
+                duracion,
+                indicaciones,
+                estado
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ''',
+            (
+                data['paciente'],
+                data['fecha'],
+                data['medicamento'],
+                data['dosis'],
+                data['frecuencia'],
+                data['duracion'],
+                data.get('indicaciones', ''),
+                data.get('estado', 'Activa'),
+            ),
+        )
+        return int(cursor.lastrowid)
+
+
+def list_prescriptions(patient_search: str = '') -> list[sqlite3.Row]:
+    with closing(connect()) as connection:
+        if patient_search:
+            return connection.execute(
+                '''
+                SELECT
+                    id,
+                    paciente,
+                    fecha,
+                    medicamento,
+                    dosis,
+                    frecuencia,
+                    duracion,
+                    estado
+                FROM prescripciones
+                WHERE LOWER(paciente) LIKE ?
+                ORDER BY id DESC
+                ''',
+                (f'%{patient_search.lower()}%',),
+            ).fetchall()
+
+        return connection.execute(
+            '''
+            SELECT
+                id,
+                paciente,
+                fecha,
+                medicamento,
+                dosis,
+                frecuencia,
+                duracion,
+                estado
+            FROM prescripciones
+            ORDER BY id DESC
+            '''
+        ).fetchall()
+
+
+def get_prescription(prescription_id: int) -> sqlite3.Row | None:
+    with closing(connect()) as connection:
+        return connection.execute(
+            'SELECT * FROM prescripciones WHERE id=?',
+            (prescription_id,),
+        ).fetchone()
+
+
+def update_prescription_state(
+    prescription_id: int,
+    new_state: str,
+) -> None:
+    if new_state not in {'Activa', 'Finalizada', 'Cancelada'}:
+        raise ValueError('Estado no válido')
+
+    with closing(connect()) as connection, connection:
+        connection.execute(
+            '''
+            UPDATE prescripciones
+            SET estado=?
+            WHERE id=?
+            ''',
+            (
+                new_state,
+                prescription_id,
+            ),
+        )

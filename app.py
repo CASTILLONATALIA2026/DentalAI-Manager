@@ -1,3 +1,4 @@
+
 import json
 from datetime import datetime
 import tkinter as tk
@@ -642,20 +643,298 @@ class DentalAIApp(ctk.CTk):
 
     # ---------------- Prescripciones ----------------
     def show_prescriptions(self) -> None:
-        page = self._page("Prescripciones", "Módulo preparado para la siguiente fase")
-        box = ctk.CTkFrame(page, fg_color="white", corner_radius=14, border_width=1, border_color="#DDE5EE")
-        box.grid(row=2, column=0, sticky="new", padx=34, pady=10)
-        ctk.CTkLabel(box, text="Prescripción inteligente", font=("Segoe UI", 21, "bold"), text_color="#1F2937").pack(pady=(28, 12))
+        self.current_screen = "prescriptions"
+        page = self._page(
+            "Prescripciones",
+            "Creación y seguimiento de prescripciones",
+        )
+
+        wrapper = ctk.CTkFrame(page, fg_color="transparent")
+        wrapper.grid(row=2, column=0, sticky="nsew", padx=34, pady=(0, 24))
+        wrapper.grid_columnconfigure((0, 1), weight=1)
+        wrapper.grid_rowconfigure(0, weight=1)
+
+        # Panel izquierdo: nueva prescripción
+        form = ctk.CTkScrollableFrame(
+            wrapper,
+            fg_color="white",
+            corner_radius=14,
+            border_width=1,
+            border_color="#DDE5EE",
+        )
+        form.grid(row=0, column=0, sticky="nsew", padx=(0, 10))
+
+        # Panel derecho: historial
+        history = ctk.CTkFrame(
+            wrapper,
+            fg_color="white",
+            corner_radius=14,
+            border_width=1,
+            border_color="#DDE5EE",
+        )
+        history.grid(row=0, column=1, sticky="nsew", padx=(10, 0))
+        history.grid_columnconfigure(0, weight=1)
+        history.grid_rowconfigure(1, weight=1)
+
         ctk.CTkLabel(
-            box,
-            text=(
-                "La versión original no contiene todavía un módulo de prescripción estructurada.\n"
-                "Esta pantalla queda integrada y lista para desarrollarlo sin romper el resto del programa."
-            ),
-            font=("Segoe UI", 14),
-            text_color="#6B7280",
-            justify="center",
-        ).pack(padx=28, pady=(0, 28))
+            form,
+            text="Nueva prescripción",
+            font=("Segoe UI", 20, "bold"),
+            text_color="#1F2937",
+        ).pack(anchor="w", padx=22, pady=(22, 14))
+
+        patient_names = [row["nombre"] for row in database.list_patients()]
+        patient_var = tk.StringVar(
+            value=patient_names[0] if patient_names else "Paciente no seleccionado"
+        )
+
+        def field_label(text: str) -> None:
+            ctk.CTkLabel(form, text=text, anchor="w").pack(
+                fill="x", padx=22, pady=(0, 4)
+            )
+
+        field_label("Paciente")
+        patient_combo = ctk.CTkComboBox(
+            form,
+            values=patient_names or ["Paciente no seleccionado"],
+            variable=patient_var,
+        )
+        patient_combo.pack(fill="x", padx=22, pady=(0, 12))
+
+        field_label("Medicamento")
+        medication = ctk.CTkEntry(form, placeholder_text="Ej. Amoxicilina")
+        medication.pack(fill="x", padx=22, pady=(0, 12))
+
+        field_label("Dosis")
+        dose = ctk.CTkEntry(form, placeholder_text="Ej. 500 mg")
+        dose.pack(fill="x", padx=22, pady=(0, 12))
+
+        field_label("Frecuencia")
+        frequency = ctk.CTkEntry(form, placeholder_text="Ej. Cada 8 horas")
+        frequency.pack(fill="x", padx=22, pady=(0, 12))
+
+        field_label("Duración")
+        duration = ctk.CTkEntry(form, placeholder_text="Ej. 7 días")
+        duration.pack(fill="x", padx=22, pady=(0, 12))
+
+        field_label("Indicaciones")
+        instructions = ctk.CTkTextbox(form, height=90)
+        instructions.pack(fill="x", padx=22, pady=(0, 12))
+
+        # Historial
+        ctk.CTkLabel(
+            history,
+            text="Historial de prescripciones",
+            font=("Segoe UI", 20, "bold"),
+            text_color="#1F2937",
+        ).grid(row=0, column=0, sticky="w", padx=22, pady=(22, 14))
+
+        table_frame = ctk.CTkFrame(history, fg_color="transparent")
+        table_frame.grid(row=1, column=0, sticky="nsew", padx=18, pady=(0, 12))
+        table_frame.grid_columnconfigure(0, weight=1)
+        table_frame.grid_rowconfigure(0, weight=1)
+
+        columns = ("ID", "Paciente", "Fecha", "Medicamento", "Dosis", "Estado")
+        widths = {
+            "ID": 45,
+            "Paciente": 135,
+            "Fecha": 125,
+            "Medicamento": 145,
+            "Dosis": 80,
+            "Estado": 85,
+        }
+
+        prescription_tree = ttk.Treeview(
+            table_frame,
+            columns=columns,
+            show="headings",
+            style="Dental.Treeview",
+        )
+        for col in columns:
+            prescription_tree.heading(col, text=col)
+            prescription_tree.column(col, width=widths[col], anchor="center")
+
+        prescription_tree.grid(row=0, column=0, sticky="nsew")
+        scrollbar = ttk.Scrollbar(
+            table_frame, orient="vertical", command=prescription_tree.yview
+        )
+        scrollbar.grid(row=0, column=1, sticky="ns")
+        prescription_tree.configure(yscrollcommand=scrollbar.set)
+
+        def reload_prescriptions() -> None:
+            prescription_tree.delete(*prescription_tree.get_children())
+            for row in database.list_prescriptions():
+                prescription_tree.insert(
+                    "",
+                    "end",
+                    values=(
+                        row["id"],
+                        row["paciente"],
+                        row["fecha"],
+                        row["medicamento"],
+                        row["dosis"],
+                        row["estado"],
+                    ),
+                )
+
+        def selected_prescription_id() -> int | None:
+            selection = prescription_tree.selection()
+            if not selection:
+                messagebox.showwarning("Aviso", "Selecciona una prescripción.")
+                return None
+            values = prescription_tree.item(selection[0], "values")
+            return int(values[0])
+
+        def save_prescription() -> None:
+            patient = patient_var.get().strip()
+            med = medication.get().strip()
+            med_dose = dose.get().strip()
+            med_frequency = frequency.get().strip()
+            med_duration = duration.get().strip()
+            notes = instructions.get("1.0", "end").strip()
+
+            if not patient or patient == "Paciente no seleccionado":
+                messagebox.showwarning("Aviso", "Selecciona un paciente.")
+                return
+            if not med or not med_dose or not med_frequency or not med_duration:
+                messagebox.showwarning(
+                    "Aviso",
+                    "Completa medicamento, dosis, frecuencia y duración.",
+                )
+                return
+
+            database.add_prescription(
+                {
+                    "paciente": patient,
+                    "fecha": datetime.now().strftime("%d/%m/%Y %H:%M"),
+                    "medicamento": med,
+                    "dosis": med_dose,
+                    "frecuencia": med_frequency,
+                    "duracion": med_duration,
+                    "indicaciones": notes,
+                    "estado": "Activa",
+                }
+            )
+            reload_prescriptions()
+            medication.delete(0, "end")
+            dose.delete(0, "end")
+            frequency.delete(0, "end")
+            duration.delete(0, "end")
+            instructions.delete("1.0", "end")
+            messagebox.showinfo(
+                "Prescripción", "Prescripción guardada correctamente."
+            )
+
+        def show_prescription_detail() -> None:
+            prescription_id = selected_prescription_id()
+            if prescription_id is None:
+                return
+            row = database.get_prescription(prescription_id)
+            if row is None:
+                messagebox.showerror(
+                    "Error", "No se ha encontrado la prescripción."
+                )
+                return
+
+            window = ctk.CTkToplevel(self)
+            window.title(f"Detalle prescripción #{prescription_id}")
+            window.geometry("650x650")
+            window.minsize(560, 520)
+            window.transient(self)
+
+            container = ctk.CTkScrollableFrame(window, fg_color="#F4F7FB")
+            container.pack(fill="both", expand=True, padx=18, pady=18)
+
+            ctk.CTkLabel(
+                container,
+                text=f"Prescripción #{prescription_id}",
+                font=("Segoe UI", 24, "bold"),
+                text_color="#1F2937",
+            ).pack(anchor="w", pady=(6, 14))
+
+            fields = [
+                ("Paciente", row["paciente"]),
+                ("Fecha", row["fecha"]),
+                ("Medicamento", row["medicamento"]),
+                ("Dosis", row["dosis"]),
+                ("Frecuencia", row["frecuencia"]),
+                ("Duración", row["duracion"]),
+                ("Indicaciones", row["indicaciones"] or "Sin indicaciones"),
+                ("Estado", row["estado"]),
+            ]
+            for title, value in fields:
+                card = ctk.CTkFrame(
+                    container,
+                    fg_color="white",
+                    corner_radius=10,
+                    border_width=1,
+                    border_color="#DDE5EE",
+                )
+                card.pack(fill="x", pady=(0, 10))
+                ctk.CTkLabel(
+                    card,
+                    text=title,
+                    font=("Segoe UI", 13, "bold"),
+                    text_color="#1F2937",
+                ).pack(anchor="w", padx=16, pady=(12, 4))
+                ctk.CTkLabel(
+                    card,
+                    text=str(value),
+                    justify="left",
+                    anchor="w",
+                    wraplength=540,
+                    text_color="#374151",
+                ).pack(fill="x", padx=16, pady=(0, 12))
+
+            ctk.CTkButton(
+                container, text="Cerrar", command=window.destroy, width=120
+            ).pack(anchor="w", pady=(6, 12))
+
+        def change_prescription_state(new_state: str) -> None:
+            prescription_id = selected_prescription_id()
+            if prescription_id is None:
+                return
+            database.update_prescription_state(prescription_id, new_state)
+            reload_prescriptions()
+
+        ctk.CTkButton(
+            form,
+            text="Guardar prescripción",
+            height=40,
+            command=save_prescription,
+        ).pack(fill="x", padx=22, pady=(4, 22))
+
+        actions = ctk.CTkFrame(history, fg_color="transparent")
+        actions.grid(row=2, column=0, sticky="ew", padx=18, pady=(0, 18))
+
+        ctk.CTkButton(
+            actions, text="Ver detalle", command=show_prescription_detail, width=110
+        ).pack(side="left", padx=(0, 6))
+        ctk.CTkButton(
+            actions,
+            text="Activa",
+            command=lambda: change_prescription_state("Activa"),
+            width=80,
+        ).pack(side="left", padx=6)
+        ctk.CTkButton(
+            actions,
+            text="Finalizada",
+            command=lambda: change_prescription_state("Finalizada"),
+            width=95,
+        ).pack(side="left", padx=6)
+        ctk.CTkButton(
+            actions,
+            text="Cancelar",
+            command=lambda: change_prescription_state("Cancelada"),
+            width=90,
+            fg_color="#C0392B",
+            hover_color="#A93226",
+        ).pack(side="left", padx=6)
+
+        prescription_tree.bind(
+            "<Double-1>", lambda _event: show_prescription_detail()
+        )
+        reload_prescriptions()
 
     # ---------------- Copilot ----------------
     def show_copilot(self, selected_patient: str | None = None) -> None:
