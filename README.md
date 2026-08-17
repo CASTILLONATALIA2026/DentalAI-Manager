@@ -191,3 +191,19 @@ Proyecto desarrollado como parte de un portfolio técnico para demostrar conocim
 - Integración de lógica de IA
 - Organización modular de una aplicación
 - Git y control de versiones
+## 📸 Capturas de pantalla
+
+### Panel principal
+![Dashboard](screenshots/dashboard.png)
+
+### Gestión de pacientes
+![Pacientes](screenshots/pacientes.png)
+
+### Prescripciones
+![Prescripciones](screenshots/prescripciones.png)
+
+### Asistente IA
+![Detalle IA](screenshots/detalle_ia.png)
+
+### Historial IA
+![Historial IA](screenshots/historial_ia.png)
