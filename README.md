@@ -191,6 +191,9 @@ Proyecto desarrollado como parte de un portfolio técnico para demostrar conocim
 - Integración de lógica de IA
 - Organización modular de una aplicación
 - Git y control de versiones
+
+```
+
 ## 📸 Capturas de pantalla
 
 ### Panel principal
