@@ -70,6 +70,8 @@ DentalAI Manager es un proyecto de portfolio orientado a demostrar la integraci�
 - **JSON** — importación de información
 - **PDF** — generación automatizada de informes
 - **Git & GitHub** — control de versiones
+- **FastAPI** — API REST
+- **Uvicorn** — servidor ASGI para ejecutar la API
 
 ## 📁 Estructura principal
 
@@ -122,6 +124,10 @@ Ejecuta la aplicación:
 ```bash
 python app.py
 ```
+### Ejecutar la API REST
+
+```bash
+uvicorn api:app --reload
 
 ## 🖥️ Capturas de pantalla
 

@@ -1,3 +1,5 @@
 customtkinter>=5.2
 openpyxl>=3.1
 reportlab>=4.0
+fastapi>=0.115
+uvicorn>=0.30
