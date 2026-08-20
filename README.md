@@ -1,17 +1,18 @@
 # 🦷 DentalAI Manager
 
-Aplicación de escritorio para la gestión de clínicas dentales desarrollada en **Python**, con una interfaz gráfica moderna, almacenamiento local mediante **SQLite** y funcionalidades de apoyo clínico y automatización documental.
+Aplicación de gestión clínica dental desarrollada en **Python**, con interfaz gráfica en **CustomTkinter**, persistencia de datos mediante **SQLite**, generación de documentación y una **API REST desarrollada con FastAPI**.
 
-DentalAI Manager es un proyecto de portfolio orientado a demostrar la integración de desarrollo de software, bases de datos, interfaces gráficas, generación de documentos y funcionalidades de inteligencia artificial en una aplicación funcional.
+DentalAI Manager es un proyecto de portfolio en desarrollo activo, creado para aplicar programación y digitalización a un entorno sanitario. El objetivo es demostrar una solución funcional y modular mediante la integración de interfaz gráfica, bases de datos, automatización documental y herramientas de apoyo al análisis clínico.
+
+> **Nota:** proyecto educativo y de portfolio. No sustituye software clínico certificado ni el diagnóstico o criterio de un profesional sanitario.
 
 ## ✨ Funcionalidades
 
 ### 👥 Gestión de pacientes
-- Alta de pacientes
-- Edición y eliminación de registros
-- Búsqueda de pacientes
-- Consulta de información almacenada
+- Alta, edición y eliminación de pacientes
+- Búsqueda y consulta de información
 - Teléfono, email y observaciones
+- Persistencia mediante SQLite
 - Importación de datos desde JSON
 - Exportación de datos a Excel
 - Generación de informes PDF
@@ -20,13 +21,11 @@ DentalAI Manager es un proyecto de portfolio orientado a demostrar la integraci�
 - Creación de prescripciones asociadas a pacientes
 - Registro de medicamento, dosis, frecuencia y duración
 - Indicaciones para el paciente
-- Historial de prescripciones
-- Consulta detallada de cada prescripción
+- Historial y consulta detallada
 - Gestión del estado de las prescripciones
-- Persistencia de datos mediante SQLite
+- Persistencia mediante SQLite
 
-### 🤖 IA Clínica
-- Módulo de apoyo al análisis clínico
+### 🤖 Módulo de apoyo al análisis clínico
 - Registro de síntomas y duración
 - Nivel de dolor
 - Antecedentes relevantes
@@ -37,47 +36,67 @@ DentalAI Manager es un proyecto de portfolio orientado a demostrar la integraci�
 - Identificación de señales de alarma
 - Almacenamiento de los análisis realizados
 
-> Los resultados generados por el módulo de IA son orientativos y requieren siempre validación profesional.
+> Los resultados generados por este módulo son orientativos y requieren siempre validación profesional.
 
-### 📋 Historial IA
+### 📋 Historial de análisis
 - Consulta de análisis realizados
 - Búsqueda por paciente
 - Filtrado por estado
 - Estados Pendiente, Validado y Rechazado
 - Vista detallada de cada análisis
-- Exportación del análisis a PDF
-
-### 📄 Informes clínicos
-- Generación de documentación clínica en PDF
-- Informes asociados a pacientes
-- Informes de análisis realizados
-- Integración con los datos almacenados en SQLite
+- Exportación a PDF
 
 ### 📊 Dashboard y estadísticas
-- Panel principal con contadores basados en los datos almacenados
 - Número de pacientes registrados
 - Análisis pendientes, validados y rechazados
 - Edad promedio
 - Distribución entre pacientes menores y adultos
 - Tratamiento más frecuente
 
+### 📄 Documentación
+- Informes asociados a pacientes
+- Informes de análisis
+- Generación de PDF
+- Exportación de información a Excel
+
+## 🌐 API REST con FastAPI
+
+DentalAI Manager incluye `api.py`, una **API REST desarrollada con FastAPI** que reutiliza la capa de datos de la aplicación.
+
+### Endpoints disponibles
+
+| Método | Endpoint | Función |
+| --- | --- | --- |
+| `GET` | `/` | Comprobar el estado de la API |
+| `GET` | `/patients` | Listar pacientes |
+| `GET` | `/patients/{patient_id}` | Consultar un paciente |
+| `POST` | `/patients` | Crear un paciente |
+| `PUT` | `/patients/{patient_id}` | Actualizar un paciente |
+| `DELETE` | `/patients/{patient_id}` | Eliminar un paciente |
+
+FastAPI genera automáticamente documentación interactiva mediante OpenAPI:
+
+- **Swagger UI:** `http://127.0.0.1:8000/docs`
+- **ReDoc:** `http://127.0.0.1:8000/redoc`
+
 ## 🛠️ Tecnologías utilizadas
+
 - **Python**
-- **CustomTkinter** — interfaz gráfica
-- **Tkinter / ttk**
-- **SQLite** — almacenamiento local de datos
-- **OpenPyXL / Excel** — exportación de información
-- **JSON** — importación de información
-- **PDF** — generación automatizada de informes
-- **Git & GitHub** — control de versiones
 - **FastAPI** — API REST
-- **Uvicorn** — servidor ASGI para ejecutar la API
+- **Uvicorn** — servidor ASGI
+- **SQLite** — persistencia de datos
+- **CustomTkinter / Tkinter / ttk** — interfaz gráfica
+- **OpenPyXL** — exportación a Excel
+- **ReportLab** — generación de PDF
+- **JSON** — importación de información
+- **Git & GitHub** — control de versiones
 
 ## 📁 Estructura principal
 
 ```text
-DentalAI_Manager_v2/
+DentalAI-Manager/
 ├── app.py
+├── api.py
 ├── database.py
 ├── copilot_logic.py
 ├── pdf_utils.py
@@ -85,49 +104,47 @@ DentalAI_Manager_v2/
 ├── run.bat
 ├── README.md
 └── screenshots/
-    ├── dashboard.png
-    ├── pacientes.png
-    ├── prescripciones.png
-    ├── historial_ia.png
-    └── detalle_ia.png
 ```
 
-### `app.py`
-Interfaz principal de la aplicación y conexión entre los diferentes módulos.
+### Archivos principales
 
-### `database.py`
-Gestión de la base de datos SQLite y operaciones relacionadas con pacientes, análisis y prescripciones.
-
-### `copilot_logic.py`
-Lógica utilizada por el módulo de IA clínica.
-
-### `pdf_utils.py`
-Generación de informes y documentación en formato PDF.
+- `app.py` — interfaz principal y coordinación de la aplicación.
+- `api.py` — API REST desarrollada con FastAPI.
+- `database.py` — persistencia y operaciones sobre SQLite.
+- `copilot_logic.py` — lógica del módulo de apoyo al análisis.
+- `pdf_utils.py` — generación de informes PDF.
+- `requirements.txt` — dependencias necesarias para ejecutar el proyecto.
 
 ## 🚀 Instalación
 
-Clona el repositorio:
+### 1. Clonar el repositorio
 
 ```bash
-git clone <URL_DEL_REPOSITORIO>
+git clone https://github.com/CASTILLONATALIA2026/DentalAI-Manager.git
 cd DentalAI-Manager
 ```
 
-Instala las dependencias:
+### 2. Instalar las dependencias
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Ejecuta la aplicación:
+### 3. Ejecutar la aplicación
 
 ```bash
 python app.py
 ```
-### Ejecutar la API REST
+
+### 4. Ejecutar la API REST
 
 ```bash
 uvicorn api:app --reload
+```
+
+Después puede abrirse Swagger UI en:
+
+`http://127.0.0.1:8000/docs`
 
 ## 🖥️ Capturas de pantalla
 
@@ -146,67 +163,45 @@ uvicorn api:app --reload
 ### Detalle de análisis IA
 ![Detalle de análisis clínico](screenshots/detalle_ia.png)
 
-> Todos los pacientes y datos mostrados en las capturas son ficticios y se utilizan exclusivamente con fines demostrativos.
+> Todos los pacientes y datos mostrados en las capturas son **ficticios** y se utilizan exclusivamente con fines demostrativos.
 
 ## 🔒 Privacidad y datos
 
 DentalAI Manager utiliza una base de datos **SQLite local**.
 
-Los archivos de base de datos (`*.db`) deben permanecer excluidos del control de versiones mediante `.gitignore`.
+Los archivos de base de datos (`*.db`) están excluidos del control de versiones mediante `.gitignore` para evitar publicar información almacenada localmente.
 
-El repositorio público no debe contener información clínica real ni datos personales de pacientes. Los datos utilizados para demostraciones y capturas del proyecto son ficticios.
+El repositorio público no debe contener información clínica real. Los pacientes y datos utilizados para demostraciones y capturas son ficticios.
 
-## ⚠️ Aviso
+## ⚠️ Alcance del proyecto
 
-DentalAI Manager es un proyecto de software desarrollado con fines educativos y de portfolio.
+DentalAI Manager es un proyecto desarrollado con fines educativos y de portfolio.
 
-Las funcionalidades relacionadas con análisis clínico y prescripciones no sustituyen el criterio, diagnóstico o supervisión de un profesional sanitario.
+Las funcionalidades relacionadas con análisis clínico y prescripciones **no sustituyen el diagnóstico, criterio ni supervisión de un profesional sanitario**.
 
 ## 🗺️ Próximas mejoras
-- Ampliación de las funcionalidades de IA
-- Mejora de estadísticas y visualizaciones
-- Exportación avanzada de prescripciones
+
+- Ampliación de funcionalidades de IA aplicada
 - Sistema de autenticación y usuarios
-- Mejoras adicionales de seguridad y validación de datos
-- Evolución de la arquitectura de la aplicación
+- Mejora de validación y manejo de errores de la API
+- Incorporación de pruebas automatizadas
+- Mejora de estadísticas y visualizaciones
+- Evolución progresiva de la arquitectura
+
+## 🎯 Qué demuestra este proyecto
+
+- Desarrollo de una aplicación funcional con Python
+- Programación orientada a objetos
+- Diseño de interfaces gráficas
+- Modelado y persistencia con SQLite
+- Operaciones CRUD
+- Creación de una API REST con FastAPI
+- Documentación automática con Swagger/OpenAPI
+- Generación de PDF y exportación a Excel
+- Organización modular del código
+- Git y control de versiones
+- Aplicación de tecnología a un problema del entorno sanitario
 
 ## 📌 Estado del proyecto
 
 **Versión funcional en desarrollo activo.**
-
-Actualmente integra gestión de pacientes, prescripciones, IA clínica, historial de análisis, generación de PDF, importación/exportación de datos y estadísticas.
-
-## 🎯 Objetivo del proyecto
-
-Proyecto desarrollado como parte de un portfolio técnico para demostrar conocimientos prácticos en:
-
-- Desarrollo con Python
-- Programación orientada a objetos
-- Diseño de interfaces gráficas
-- Bases de datos SQLite
-- Operaciones CRUD
-- Persistencia de datos
-- Generación de documentos
-- Importación y exportación de información
-- Integración de lógica de IA
-- Organización modular de una aplicación
-- Git y control de versiones
-
-```
-
-## 📸 Capturas de pantalla
-
-### Panel principal
-![Dashboard](screenshots/dashboard.png)
-
-### Gestión de pacientes
-![Pacientes](screenshots/pacientes.png)
-
-### Prescripciones
-![Prescripciones](screenshots/prescripciones.png)
-
-### Asistente IA
-![Detalle IA](screenshots/detalle_ia.png)
-
-### Historial IA
-![Historial IA](screenshots/historial_ia.png)
